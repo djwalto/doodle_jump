@@ -12,18 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let isJumping = true
     let isGoingLeft = false
     let isGoingRight = false
+    let speed = 3
     let leftTimerId
     let rightTimerId
     let score = 0
 
-
-    function createDoodler() {
-        grid.appendChild(doodler)
-        doodler.classList.add('doodler')
-        doodlerLeftSpace = platforms[0].left
-        doodler.style.left = doodlerLeftSpace + 'px';
-        doodler.style.bottom = doodlerBottomSpace + 'px';
-    }
 
     class Platform {
         constructor(newPlatformBottom) {
@@ -62,28 +55,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     platforms.shift()
                     score++
                     console.log(platforms)
-                    let newPlatform = new Platform(600)
+                    var newPlatform = new Platform(600)
                     platforms.push(newPlatform)
                 }
             })
         }
     }
 
-    function jump() {
-        clearInterval(downTimerId)
-        isJumping = true
-        upTimerId = setInterval(function () {
-            doodlerBottomSpace += 20
-            doodler.style.bottom = doodlerBottomSpace + 'px'
-            if (doodlerBottomSpace > startPoint + 200) {
-                fall()
-            }
-        }, 20)
+
+    function createDoodler() {
+        grid.appendChild(doodler)
+        doodler.classList.add('doodler')
+        doodlerLeftSpace = platforms[0].left
+        doodler.style.left = doodlerLeftSpace + 'px';
+        doodler.style.bottom = doodlerBottomSpace + 'px';
     }
 
     function fall() {
-        clearInterval(upTimerId)
         isJumping = false
+        clearInterval(upTimerId)
         downTimerId = setInterval(function () {
             doodlerBottomSpace -= 5
             doodler.style.bottom = doodlerBottomSpace + 'px'
@@ -103,48 +93,39 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log('landed')
                     startPoint = doodlerBottomSpace
                     jump()
+                    isJumping = true
                 }
             })
         }, 20)
     }
 
 
-    function gameOver() {
-        console.log('game over')
-        isGameOver = true
-        while (grid.firstChild) {
-            grid.removeChild(grid.firstChild)
-        }
-        grid.innerHTML = score
-        clearInterval(upTimerId)
+    function jump() {
         clearInterval(downTimerId)
-        clearInterval(leftTimerId)
-        clearInterval(rightTimerId)
+        isJumping = true
+        upTimerId = setInterval(function () {
+            doodlerBottomSpace += 20
+            doodler.style.bottom = doodlerBottomSpace + 'px'
+            if (doodlerBottomSpace > (startPoint + 200)) {
+                fall()
+                isJumping = false
+            }
+        }, 30)
     }
 
-    function control(e) {
-        if (e.key === "ArrowLeft") {
-            moveLeft()
-
-        }
-        //
-        else if (e.key === "ArrowRight") {
-            moveRight()
-        }
-        //
-        else if (e.key === "ArrowUp") {
-            moveStraight()
-        }
-    }
 
     function moveLeft() {
+        if (isGoingRight) {
+            clearInterval(rightTimerId)
+            isGoingRight = false
+        }
         isGoingLeft = true
         leftTimerId = setInterval(function () {
             if (doodlerLeftSpace >= 0) {
                 doodlerLeftSpace -= 5
                 doodler.style.left = doodlerLeftSpace + 'px'
             } else moveRight()
-        }, 30)
+        }, 20)
     }
 
     function moveRight() {
@@ -168,6 +149,34 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(leftTimerId)
         clearInterval(rightTimerId)
 
+    }
+
+    function control(e) {
+        if (e.key === "ArrowLeft") {
+            moveLeft()
+
+        }
+        //
+        else if (e.key === "ArrowRight") {
+            moveRight()
+        }
+        //
+        else if (e.key === "ArrowUp") {
+            moveStraight()
+        }
+    }
+
+    function gameOver() {
+        console.log('game over')
+        isGameOver = true
+        while (grid.firstChild) {
+            grid.removeChild(grid.firstChild)
+        }
+        grid.innerHTML = score
+        clearInterval(upTimerId)
+        clearInterval(downTimerId)
+        clearInterval(leftTimerId)
+        clearInterval(rightTimerId)
     }
 
     function start() {
